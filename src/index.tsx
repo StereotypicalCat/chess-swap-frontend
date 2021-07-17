@@ -3,10 +3,20 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import ChessSwap from "./ChessSwap";
+
+// Chat Example
+/*ReactDOM.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+  document.getElementById('root')
+);*/
+
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <ChessSwap />
   </React.StrictMode>,
   document.getElementById('root')
 );
