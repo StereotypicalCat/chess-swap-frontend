@@ -1,32 +1,45 @@
 import React from 'react';
 import './App.css';
+import {Simulate} from "react-dom/test-utils";
 
 interface IAppProps {
 
 }
 interface IAppState {
     text: string,
-    chat: string
+    chat: string,
+    lobby: string
 }
 
 class App extends React.Component<IAppProps, IAppState> {
+
+    ws: WebSocket|null = null;
 
     constructor(props: {}) {
         super(props);
 
         this.state = {
             text: "",
-            chat: ""
+            chat: "",
+            lobby: ""
         }
+
+        this.joinLobby("default");
     }
 
-    ws = new WebSocket("ws://localhost:5000/ws");
 
+    joinLobby(lobbyName: string){
 
+        if (this.ws?.OPEN){
+            this.ws.close();
+        }
 
-    componentDidMount(){
+        console.log("Connecting to lobby " + lobbyName + "...")
+
+        this.ws = new WebSocket(`ws://localhost:5000/${lobbyName}/ws`)
+
         this.ws.onopen = () => {
-            console.log('connected')
+            console.log('connected to lobby: ' + lobbyName);
         }
 
         this.ws.onmessage = evt => {
@@ -35,8 +48,6 @@ class App extends React.Component<IAppProps, IAppState> {
             this.setState({chat: this.state.chat + "\n" + message})
             console.log(message);
         }
-
-        return () => this.ws.close();
     }
 
     render(){
@@ -46,7 +57,15 @@ class App extends React.Component<IAppProps, IAppState> {
             <input placeholder="say something" id="text" type="text" value={this.state.text} onChange={(e) => this.setState({
                 text: e.target.value
             })}/>
-            <button onClick={(e => {this.ws.send(this.state.text)})}/>
+            <p>Current Lobby:</p>
+            <input placeholder="say something" id="text" type="text" value={this.state.lobby} onChange={(e) => this.setState({
+                lobby: e.target.value
+            })}/>
+            <button onClick={(e => {
+                // ws is not null after constructor.
+                // @ts-ignore
+                this.ws.send(this.state.text)})}>Send message</button>
+            <button onClick={(e => {this.joinLobby(this.state.lobby)})}>Join Lobby</button>
         </div>
     }
 }
