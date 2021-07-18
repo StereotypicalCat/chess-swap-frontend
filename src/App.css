@@ -15,8 +15,21 @@
   flex-direction: column;
 }
 
-#swapText{
-  display: flex;
+.swapText{
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.swapText p{
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+#turnsToSwapNumber{
+  font-weight: bold;
+  font-size: 2em;
 }
 
 .alignTextCenter{

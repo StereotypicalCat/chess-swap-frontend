@@ -111,9 +111,13 @@ class App extends React.Component<IAppProps, IAppState> {
         else if (this.state.playerColor !== undefined){
             return <div>
                 <div className={"center"}>
-                    <p id={"swapText"}>Swap in {this.state.turnsToSwap} turns</p>
-                    <ChessSwap orientation={this.state.playerColor} updateTurnsToSwapOnGui={this.updateTurnsToSwap.bind(this)} turnsToSwap={6} ws={this.getWebsocket()} isSpectating={this.state.isSpectator}/>
+                    <div className={"swapText"}>
+                        <p>Swap in</p>
+                        <p id={"turnsToSwapNumber"}>{this.state.turnsToSwap}</p>
+                        <p>turns</p>
+                    </div>
 
+                    <ChessSwap orientation={this.state.playerColor} updateTurnsToSwapOnGui={this.updateTurnsToSwap.bind(this)} turnsToSwap={6} ws={this.getWebsocket()} isSpectating={this.state.isSpectator}/>
                 </div>
             </div>
 
