@@ -8,9 +8,11 @@ import ConnectionCommands from "./ConnectionCommands";
 interface IAppProps {
 
 }
+
 interface IAppState {
     lobby: string,
     joinLobbyText: string,
+    isJoiningLobby: boolean,
     playerColor: Color | undefined,
     turnsToSwap: number,
     isSpectator: boolean
@@ -18,7 +20,7 @@ interface IAppState {
 
 class App extends React.Component<IAppProps, IAppState> {
 
-    ws: WebSocket|null = null;
+    ws: WebSocket | null = null;
 
     constructor(props: {}) {
         super(props);
@@ -26,32 +28,34 @@ class App extends React.Component<IAppProps, IAppState> {
         this.state = {
             lobby: "",
             joinLobbyText: "",
+            isJoiningLobby: false,
             playerColor: undefined,
             turnsToSwap: 6,
             isSpectator: false
         }
+
     }
 
-    createLobby(){
+    createLobby() {
         let newLobby: string = uuidv4();
         this.setState({lobby: newLobby})
         this.connectToLobby(newLobby);
     }
 
-    updateTurnsToSwap(turnsToSwap: number){
+    updateTurnsToSwap(turnsToSwap: number) {
         this.setState({
             turnsToSwap: turnsToSwap
         })
     }
 
-    joinLobby(lobbyName: string){
+    joinLobby(lobbyName: string) {
         this.setState({lobby: lobbyName})
         this.connectToLobby(lobbyName);
     }
 
-    connectToLobby(lobbyName){
+    connectToLobby(lobbyName) {
 
-        if (this.ws?.OPEN){
+        if (this.ws?.OPEN) {
             this.ws.close();
         }
 
@@ -89,26 +93,46 @@ class App extends React.Component<IAppProps, IAppState> {
         }
     }
 
-     getWebsocket(): WebSocket {
-        if (this.ws == null){
+    getWebsocket(): WebSocket {
+        if (this.ws == null) {
             throw Error("Websocket wasn't ready")
-        }
-        else{
+        } else {
             return this.ws;
         }
-     }
+    }
 
-    render(){
-        if (this.state.lobby === ""){
-            return  <div className={"alignTextCenter"}>
+    render() {
+        if (this.state.isJoiningLobby && this.state.playerColor === undefined) {
+            return <div className={"alignTextCenter"}>
                 <h3>Welcome to Chess Swap!</h3>
                 <p>A game by <a href="https://lucaswinther.info">Lucas Winther</a></p>
-                <p>This was made using open source tools. See the <a href={"https://github.com/StereotypicalCat/chess-swap-backend"}>backend</a> or <a href={"https://github.com/StereotypicalCat/chess-swap-frontend"}>frontend</a> respotistory for more information</p>
-                <button onClick={this.createLobby.bind(this)}>Create a lobby</button>
-                <button onClick={() => {this.joinLobby.bind(this); this.joinLobby(this.state.joinLobbyText)}}>Join this lobby: </button> <input type={"text"} value={this.state.joinLobbyText} onChange={(e) => this.setState({joinLobbyText: e.target.value})} placeholder={"lobby name"}/>
+                <p>This was made using open source tools. See the <a
+                    href={"https://github.com/StereotypicalCat/chess-swap-backend"}>backend</a> or <a
+                    href={"https://github.com/StereotypicalCat/chess-swap-frontend"}>frontend</a> respotistory for more
+                    information</p>
+                <input type={"text"} value={this.state.joinLobbyText}
+                       onChange={(e) => this.setState({joinLobbyText: e.target.value})} placeholder={"lobby name"}/>
+                <button onClick={() => {
+                    this.joinLobby.bind(this);
+                    this.joinLobby(this.state.joinLobbyText)
+                }}>Join lobby
+                </button>
             </div>
-        }
-        else if (this.state.playerColor !== undefined){
+        } else if (this.state.lobby === "") {
+            return <div className={"alignTextCenter"}>
+                <h3>Welcome to Chess Swap!</h3>
+                <p>A game by <a href="https://lucaswinther.info">Lucas Winther</a></p>
+                <p>This was made using open source tools. See the <a
+                    href={"https://github.com/StereotypicalCat/chess-swap-backend"}>backend</a> or <a
+                    href={"https://github.com/StereotypicalCat/chess-swap-frontend"}>frontend</a> respotistory for more
+                    information</p>
+                <button onClick={this.createLobby.bind(this)}>Create a lobby</button>
+                <button onClick={() => {
+                    this.setState({isJoiningLobby: true})
+                }}>Join a lobby
+                </button>
+            </div>
+        } else if (this.state.playerColor !== undefined) {
             return <div>
                 <div className={"center"}>
                     <div className={"swapText"}>
@@ -117,12 +141,13 @@ class App extends React.Component<IAppProps, IAppState> {
                         <p>turns</p>
                     </div>
 
-                    <ChessSwap orientation={this.state.playerColor} updateTurnsToSwapOnGui={this.updateTurnsToSwap.bind(this)} turnsToSwap={6} ws={this.getWebsocket()} isSpectating={this.state.isSpectator}/>
+                    <ChessSwap orientation={this.state.playerColor}
+                               updateTurnsToSwapOnGui={this.updateTurnsToSwap.bind(this)} turnsToSwap={6}
+                               ws={this.getWebsocket()} isSpectating={this.state.isSpectator}/>
                 </div>
             </div>
 
-        }
-        else{
+        } else {
             return <div className={"alignTextCenter"}>
                 <h3>You are in lobby</h3> <h3>{this.state.lobby}</h3>
                 <p>Waiting for opponent</p>

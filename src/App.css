@@ -35,3 +35,8 @@
 .alignTextCenter{
   text-align: center;
 }
+
+button {
+  margin-right: 10px;
+  margin-left: 10px;
+}
