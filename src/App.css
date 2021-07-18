@@ -5,3 +5,20 @@
   min-height: 300px;
   padding: 20px;
 }
+
+.center{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  flex-direction: column;
+}
+
+#swapText{
+  display: flex;
+}
+
+.alignTextCenter{
+  text-align: center;
+}

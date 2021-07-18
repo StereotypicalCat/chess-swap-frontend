@@ -100,7 +100,7 @@ class App extends React.Component<IAppProps, IAppState> {
 
     render(){
         if (this.state.lobby === ""){
-            return  <div>
+            return  <div className={"alignTextCenter"}>
                 <h3>Welcome to Chess Swap!</h3>
                 <p>A game by <a href="https://lucaswinther.info">Lucas Winther</a></p>
                 <p>This was made using open source tools. See the <a href={"https://github.com/StereotypicalCat/chess-swap-backend"}>backend</a> or <a href={"https://github.com/StereotypicalCat/chess-swap-frontend"}>frontend</a> respotistory for more information</p>
@@ -110,12 +110,16 @@ class App extends React.Component<IAppProps, IAppState> {
         }
         else if (this.state.playerColor !== undefined){
             return <div>
-                <p>Swap in {this.state.turnsToSwap} turns</p>
-                <ChessSwap orientation={this.state.playerColor} updateTurnsToSwapOnGui={this.updateTurnsToSwap.bind(this)} turnsToSwap={6} ws={this.getWebsocket()} isSpectating={this.state.isSpectator}/>
+                <div className={"center"}>
+                    <p id={"swapText"}>Swap in {this.state.turnsToSwap} turns</p>
+                    <ChessSwap orientation={this.state.playerColor} updateTurnsToSwapOnGui={this.updateTurnsToSwap.bind(this)} turnsToSwap={6} ws={this.getWebsocket()} isSpectating={this.state.isSpectator}/>
+
+                </div>
             </div>
+
         }
         else{
-            return <div>
+            return <div className={"alignTextCenter"}>
                 <h3>You are in lobby</h3> <h3>{this.state.lobby}</h3>
                 <p>Waiting for opponent</p>
             </div>
