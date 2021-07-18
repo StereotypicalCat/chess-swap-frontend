@@ -59,7 +59,7 @@ export default class ChessSwap extends Component<IChessSwapProps, IChessSwapStat
             // Color
             currentPlayerColor: this.props.orientation,
             // Whos turn it is
-            currentlyMyTurn: this.props.orientation == Color.white
+            currentlyMyTurn: this.props.orientation === Color.white
         };
 
         this.props.ws.onmessage = (evt) => {
@@ -170,13 +170,13 @@ export default class ChessSwap extends Component<IChessSwapProps, IChessSwapStat
     };
 
     swapIfNeeded = () => {
-        if (this.state.turnsToNextSwap == 0){
-            let newColor = this.state.currentPlayerColor == Color.white ? Color.black : Color.white;
+        if (this.state.turnsToNextSwap === 0){
+            let newColor = this.state.currentPlayerColor === Color.white ? Color.black : Color.white;
             this.setState({
                 turnsToNextSwap: this.props.turnsToSwap,
                 currentPlayerColor: newColor,
                 currentOrientation: newColor,
-                currentlyMyTurn: newColor == Color.black
+                currentlyMyTurn: newColor === Color.black
             })
         }
     }
