@@ -85,6 +85,7 @@ export default class ChessSwap extends Component<IChessSwapProps, IChessSwapStat
                         currentlyMyTurn: true,
                         turnsToNextSwap: this.state.turnsToNextSwap - 1
                     }));
+                    this.swapIfNeeded();
                     this.props.updateTurnsToSwapOnGui(this.state.turnsToNextSwap)
                     break;
             }
@@ -156,9 +157,21 @@ export default class ChessSwap extends Component<IChessSwapProps, IChessSwapStat
         this.setState({
             turnsToNextSwap: this.state.turnsToNextSwap - 1,
             currentlyMyTurn: false})
+        this.swapIfNeeded();
         this.props.updateTurnsToSwapOnGui(this.state.turnsToNextSwap)
-
     };
+
+    swapIfNeeded = () => {
+        if (this.state.turnsToNextSwap == 0){
+            let newColor = this.state.currentPlayerColor == Color.white ? Color.black : Color.white;
+            this.setState({
+                turnsToNextSwap: this.props.turnsToSwap,
+                currentPlayerColor: newColor,
+                currentOrientation: newColor,
+                currentlyMyTurn: newColor == Color.black
+            })
+        }
+    }
 
     onMouseOverSquare = (square: string) => {
         // get list of possible moves for this square
