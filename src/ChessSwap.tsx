@@ -182,6 +182,11 @@ export default class ChessSwap extends Component<IChessSwapProps, IChessSwapStat
     }
 
     onMouseOverSquare = (square: string) => {
+        // Don't show moves when not your turn
+        if (!this.state.currentlyMyTurn){
+            return;
+        }
+
         // get list of possible moves for this square
         let moves = this.game.moves({
             square: square,
