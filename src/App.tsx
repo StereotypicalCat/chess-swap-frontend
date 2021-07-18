@@ -57,7 +57,7 @@ class App extends React.Component<IAppProps, IAppState> {
 
         console.log("Connecting to lobby " + lobbyName + "...")
 
-        this.ws = new WebSocket(`ws://localhost:5000/${lobbyName}/ws`)
+        this.ws = new WebSocket(`ws://chessswapapi.lucaswinther.info/${lobbyName}/ws`)
 
         this.ws.onopen = () => {
             console.log('connected to lobby: ' + lobbyName);
