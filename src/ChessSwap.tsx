@@ -22,7 +22,8 @@ interface IChessSwapState {
     currentOrientation: Color,
     turnsToNextSwap: number,
     currentPlayerColor: Color,
-    currentlyMyTurn: boolean
+    currentlyMyTurn: boolean,
+    windowHeight: number
 }
 
 interface IOnDrop {
@@ -40,6 +41,7 @@ export default class ChessSwap extends Component<IChessSwapProps, IChessSwapStat
     constructor(props: IChessSwapProps | Readonly<IChessSwapProps>) {
         super(props);
 
+        // Starting state
         this.state = {
             fen: "start",
             // square styles for active drop square
@@ -59,9 +61,12 @@ export default class ChessSwap extends Component<IChessSwapProps, IChessSwapStat
             // Color
             currentPlayerColor: this.props.orientation,
             // Whos turn it is
-            currentlyMyTurn: this.props.orientation === Color.white
+            currentlyMyTurn: this.props.orientation === Color.white,
+            // The size of the chessboard
+            windowHeight: window.innerHeight
         };
 
+        // Network Code
         this.props.ws.onmessage = (evt) => {
             const message = evt.data;
             console.log(message);
@@ -95,6 +100,9 @@ export default class ChessSwap extends Component<IChessSwapProps, IChessSwapStat
             }
 
         }
+
+        // UI Code
+        window.addEventListener('resize', () => {this.setState({windowHeight: window.innerHeight})})
     }
 
     static propTypes = { children: PropTypes.func };
@@ -246,9 +254,10 @@ export default class ChessSwap extends Component<IChessSwapProps, IChessSwapStat
     render() {
 
         const { fen, dropSquareStyle, squareStyles } = this.state;
+
         return <Chessboard
             id="chess-board"
-            width={320}
+            width={0.8 * this.state.windowHeight}
             position={fen}
             /* @ts-ignore */
             onDrop={this.onDrop}
