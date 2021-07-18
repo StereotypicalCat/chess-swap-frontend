@@ -30,7 +30,7 @@ class App extends React.Component<IAppProps, IAppState> {
             joinLobbyText: "",
             isJoiningLobby: false,
             playerColor: undefined,
-            turnsToSwap: 6,
+            turnsToSwap: 5,
             isSpectator: false
         }
 
