@@ -242,7 +242,7 @@ export default class ChessSwap extends Component<IChessSwapProps, IChessSwapStat
 
         const { fen, dropSquareStyle, squareStyles } = this.state;
         return <Chessboard
-            id="humanVsHuman"
+            id="chess-board"
             width={320}
             position={fen}
             /* @ts-ignore */
