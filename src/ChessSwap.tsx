@@ -2,9 +2,12 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import Chess, {Piece} from "chess.js"; // import Chess from  "chess.js"(default) if recieving an error about new Chess() not being a constructor
 import Chessboard from "chessboardjsx";
+import Color from "./Color";
 
 interface IChessSwapProps {
-
+    orientation: Color,
+    updateTurnsToSwapOnGui: (number) => void,
+    turnsToSwap: number
 }
 interface IChessSwapState {
     fen: string,
@@ -12,9 +15,10 @@ interface IChessSwapState {
     squareStyles: object,
     pieceSquare: string,
     square: string,
-    history: []
+    history: [],
+    currentOrientation: Color,
+    turnsToNextSwap: number
 }
-
 
 interface IOnDrop {
     sourceSquare: string,
@@ -22,7 +26,7 @@ interface IOnDrop {
     piece: Piece
 }
 
-class HumanVsHuman extends Component<IChessSwapProps, IChessSwapState> {
+export default class ChessSwap extends Component<IChessSwapProps, IChessSwapState> {
 
     // @ts-ignore
     // It obviously does, rtfm typescript!
@@ -42,7 +46,11 @@ class HumanVsHuman extends Component<IChessSwapProps, IChessSwapState> {
             // currently clicked square
             square: "",
             // array of past game moves
-            history: []
+            history: [],
+            // Which color the player is
+            currentOrientation: this.props.orientation,
+            // When to swap
+            turnsToNextSwap: this.props.turnsToSwap
         };
     }
 
@@ -82,7 +90,6 @@ class HumanVsHuman extends Component<IChessSwapProps, IChessSwapState> {
         }));
     };
 
-
     onDrop = (info: IOnDrop ) => {
         let sourceSquare = info.sourceSquare;
         let targetSquare = info.targetSquare;
@@ -100,6 +107,9 @@ class HumanVsHuman extends Component<IChessSwapProps, IChessSwapState> {
             history: this.game.history({ verbose: true }),
             squareStyles: squareStyling({ pieceSquare, history })
         }));
+
+        this.setState({turnsToNextSwap: this.state.turnsToNextSwap - 1})
+        this.props.updateTurnsToSwapOnGui(this.state.turnsToNextSwap)
     };
 
     onMouseOverSquare = (square: string) => {
@@ -160,61 +170,29 @@ class HumanVsHuman extends Component<IChessSwapProps, IChessSwapState> {
         });
 
     render() {
-        const { fen, dropSquareStyle, squareStyles } = this.state;
 
-        // @ts-ignore
-        return this.props.children({
-            squareStyles,
-            position: fen,
-            onMouseOverSquare: this.onMouseOverSquare,
-            onMouseOutSquare: this.onMouseOutSquare,
-            onDrop: this.onDrop,
-            dropSquareStyle,
-            onDragOverSquare: this.onDragOverSquare,
-            onSquareClick: this.onSquareClick,
-            onSquareRightClick: this.onSquareRightClick
-        });
+        const { fen, dropSquareStyle, squareStyles } = this.state;
+        return <Chessboard
+            id="humanVsHuman"
+            width={320}
+            position={fen}
+            /* @ts-ignore */
+            onDrop={this.onDrop}
+            orientation={this.state.currentOrientation}
+            onMouseOverSquare={this.onMouseOverSquare}
+            onMouseOutSquare={this.onMouseOutSquare}
+            boardStyle={{
+                borderRadius: "5px",
+                boxShadow: `0 5px 15px rgba(0, 0, 0, 0.5)`
+            }}
+            squareStyles={squareStyles}
+            dropSquareStyle={dropSquareStyle}
+            onDragOverSquare={this.onDragOverSquare}
+            onSquareClick={this.onSquareClick}
+            onSquareRightClick={this.onSquareRightClick}
+        />
     }
 }
-
-export default function ChessSwap() {
-    return (
-        <div>
-            <HumanVsHuman>
-                {({
-                      position,
-                      onDrop,
-                      onMouseOverSquare,
-                      onMouseOutSquare,
-                      squareStyles,
-                      dropSquareStyle,
-                      onDragOverSquare,
-                      onSquareClick,
-                      onSquareRightClick
-                  }) => (
-                    <Chessboard
-                        id="humanVsHuman"
-                        width={320}
-                        position={position}
-                        onDrop={onDrop}
-                        onMouseOverSquare={onMouseOverSquare}
-                        onMouseOutSquare={onMouseOutSquare}
-                        boardStyle={{
-                            borderRadius: "5px",
-                            boxShadow: `0 5px 15px rgba(0, 0, 0, 0.5)`
-                        }}
-                        squareStyles={squareStyles}
-                        dropSquareStyle={dropSquareStyle}
-                        onDragOverSquare={onDragOverSquare}
-                        onSquareClick={onSquareClick}
-                        onSquareRightClick={onSquareRightClick}
-                    />
-                )}
-            </HumanVsHuman>
-        </div>
-    );
-}
-
 // @ts-ignore
 const squareStyling = ({ pieceSquare, history }) => {
     const sourceSquare = history.length && history[history.length - 1].from;
