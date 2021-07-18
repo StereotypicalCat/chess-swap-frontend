@@ -3,13 +3,14 @@ import PropTypes from "prop-types";
 import Chess, {Piece} from "chess.js"; // import Chess from  "chess.js"(default) if recieving an error about new Chess() not being a constructor
 import Chessboard from "chessboardjsx";
 import Color from "./Color";
-import chessCommands from "./chessCommands";
+import ConnectionCommands from "./ConnectionCommands";
 
 interface IChessSwapProps {
     orientation: Color,
     updateTurnsToSwapOnGui: (number) => void,
     turnsToSwap: number,
-    ws: WebSocket
+    ws: WebSocket,
+    isSpectating: boolean
 }
 interface IChessSwapState {
     fen: string,
@@ -64,10 +65,10 @@ export default class ChessSwap extends Component<IChessSwapProps, IChessSwapStat
         this.props.ws.onmessage = (evt) => {
             const message = evt.data;
             console.log(message);
-            const cmd: string[] = message.split(chessCommands.seperator)
+            const cmd: string[] = message.split(ConnectionCommands.seperator)
 
             switch (cmd[0]) {
-                case chessCommands.newMove:
+                case ConnectionCommands.newMove:
                     console.log("Doing new move from server")
                     let move = this.game.move({
                         from: cmd[1],
@@ -88,6 +89,9 @@ export default class ChessSwap extends Component<IChessSwapProps, IChessSwapStat
                     this.swapIfNeeded();
                     this.props.updateTurnsToSwapOnGui(this.state.turnsToNextSwap)
                     break;
+                case ConnectionCommands.isThereOpponent:
+                    // Spectator joined
+                    this.props.ws.send(ConnectionCommands.youAreSpectator)
             }
 
         }
@@ -134,6 +138,10 @@ export default class ChessSwap extends Component<IChessSwapProps, IChessSwapStat
         if (!this.state.currentlyMyTurn){
             return;
         }
+        // Test if the player is a spectator
+        if (this.props.isSpectating){
+            return;
+        }
 
         let sourceSquare = info.sourceSquare;
         let targetSquare = info.targetSquare;
@@ -153,7 +161,7 @@ export default class ChessSwap extends Component<IChessSwapProps, IChessSwapStat
             squareStyles: squareStyling({ pieceSquare, history })
         }));
 
-        this.props.ws.send(chessCommands.newMove + chessCommands.seperator + info.sourceSquare + chessCommands.seperator + info.targetSquare)
+        this.props.ws.send(ConnectionCommands.newMove + ConnectionCommands.seperator + info.sourceSquare + ConnectionCommands.seperator + info.targetSquare)
         this.setState({
             turnsToNextSwap: this.state.turnsToNextSwap - 1,
             currentlyMyTurn: false})

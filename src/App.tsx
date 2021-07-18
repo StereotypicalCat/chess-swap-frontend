@@ -3,6 +3,7 @@ import './App.css';
 import {v4 as uuidv4} from 'uuid';
 import ChessSwap from "./ChessSwap";
 import Color from "./Color";
+import ConnectionCommands from "./ConnectionCommands";
 
 interface IAppProps {
 
@@ -11,7 +12,8 @@ interface IAppState {
     lobby: string,
     joinLobbyText: string,
     playerColor: Color | undefined,
-    turnsToSwap: number
+    turnsToSwap: number,
+    isSpectator: boolean
 }
 
 class App extends React.Component<IAppProps, IAppState> {
@@ -25,7 +27,8 @@ class App extends React.Component<IAppProps, IAppState> {
             lobby: "",
             joinLobbyText: "",
             playerColor: undefined,
-            turnsToSwap: 6
+            turnsToSwap: 6,
+            isSpectator: false
         }
     }
 
@@ -42,7 +45,6 @@ class App extends React.Component<IAppProps, IAppState> {
     }
 
     joinLobby(lobbyName: string){
-        // TODO: Do announcement here
         this.setState({lobby: lobbyName})
         this.connectToLobby(lobbyName);
     }
@@ -59,7 +61,7 @@ class App extends React.Component<IAppProps, IAppState> {
 
         this.ws.onopen = () => {
             console.log('connected to lobby: ' + lobbyName);
-            this.ws?.send("isThereOpponent")
+            this.ws?.send(ConnectionCommands.isThereOpponent)
         }
 
         this.ws.onmessage = evt => {
@@ -68,14 +70,20 @@ class App extends React.Component<IAppProps, IAppState> {
             console.log(message);
 
             switch (message) {
-                case "isThereOpponent":
-                    this.ws?.send("OpponentReady");
+                case ConnectionCommands.isThereOpponent:
+                    this.ws?.send(ConnectionCommands.opponentReady);
                     console.log("I am white");
                     this.setState({playerColor: Color.white})
                     break;
-                case "OpponentReady":
+                case ConnectionCommands.opponentReady:
                     console.log("I am black");
                     this.setState({playerColor: Color.black})
+                    break
+                case ConnectionCommands.youAreSpectator:
+                    console.log("Game is already in progress. Spectating game")
+                    this.setState({isSpectator: true})
+                    this.setState({playerColor: Color.white})
+                    break
             }
 
         }
@@ -103,7 +111,7 @@ class App extends React.Component<IAppProps, IAppState> {
         else if (this.state.playerColor !== undefined){
             return <div>
                 <p>Swap in {this.state.turnsToSwap} turns</p>
-                <ChessSwap orientation={this.state.playerColor} updateTurnsToSwapOnGui={this.updateTurnsToSwap.bind(this)} turnsToSwap={6} ws={this.getWebsocket()} />
+                <ChessSwap orientation={this.state.playerColor} updateTurnsToSwapOnGui={this.updateTurnsToSwap.bind(this)} turnsToSwap={6} ws={this.getWebsocket()} isSpectating={this.state.isSpectator}/>
             </div>
         }
         else{
