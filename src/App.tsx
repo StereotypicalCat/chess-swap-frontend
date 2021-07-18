@@ -81,6 +81,15 @@ class App extends React.Component<IAppProps, IAppState> {
         }
     }
 
+     getWebsocket(): WebSocket {
+        if (this.ws == null){
+            throw Error("Websocket wasn't ready")
+        }
+        else{
+            return this.ws;
+        }
+     }
+
     render(){
         if (this.state.lobby === ""){
             return  <div>
@@ -94,7 +103,7 @@ class App extends React.Component<IAppProps, IAppState> {
         else if (this.state.playerColor !== undefined){
             return <div>
                 <p>Swap in {this.state.turnsToSwap} turns</p>
-                <ChessSwap orientation={this.state.playerColor} updateTurnsToSwapOnGui={this.updateTurnsToSwap.bind(this)} turnsToSwap={6} />
+                <ChessSwap orientation={this.state.playerColor} updateTurnsToSwapOnGui={this.updateTurnsToSwap.bind(this)} turnsToSwap={6} ws={this.getWebsocket()} />
             </div>
         }
         else{

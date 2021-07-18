@@ -3,11 +3,13 @@ import PropTypes from "prop-types";
 import Chess, {Piece} from "chess.js"; // import Chess from  "chess.js"(default) if recieving an error about new Chess() not being a constructor
 import Chessboard from "chessboardjsx";
 import Color from "./Color";
+import chessCommands from "./chessCommands";
 
 interface IChessSwapProps {
     orientation: Color,
     updateTurnsToSwapOnGui: (number) => void,
-    turnsToSwap: number
+    turnsToSwap: number,
+    ws: WebSocket
 }
 interface IChessSwapState {
     fen: string,
@@ -17,7 +19,9 @@ interface IChessSwapState {
     square: string,
     history: [],
     currentOrientation: Color,
-    turnsToNextSwap: number
+    turnsToNextSwap: number,
+    currentPlayerColor: Color,
+    currentlyMyTurn: boolean
 }
 
 interface IOnDrop {
@@ -50,8 +54,42 @@ export default class ChessSwap extends Component<IChessSwapProps, IChessSwapStat
             // Which color the player is
             currentOrientation: this.props.orientation,
             // When to swap
-            turnsToNextSwap: this.props.turnsToSwap
+            turnsToNextSwap: this.props.turnsToSwap,
+            // Color
+            currentPlayerColor: this.props.orientation,
+            // Whos turn it is
+            currentlyMyTurn: this.props.orientation == Color.white
         };
+
+        this.props.ws.onmessage = (evt) => {
+            const message = evt.data;
+            console.log(message);
+            const cmd: string[] = message.split(chessCommands.seperator)
+
+            switch (cmd[0]) {
+                case chessCommands.newMove:
+                    console.log("Doing new move from server")
+                    let move = this.game.move({
+                        from: cmd[1],
+                        to: cmd[2],
+                        promotion: "q" // always promote to a queen for example simplicity
+                    });
+
+                    // illegal move
+                    if (move === null) return;
+
+                    this.setState(({ history, pieceSquare }) => ({
+                        fen: this.game.fen(),
+                        history: this.game.history({ verbose: true }),
+                        squareStyles: squareStyling({ pieceSquare, history }),
+                        currentlyMyTurn: true,
+                        turnsToNextSwap: this.state.turnsToNextSwap - 1
+                    }));
+                    this.props.updateTurnsToSwapOnGui(this.state.turnsToNextSwap)
+                    break;
+            }
+
+        }
     }
 
     static propTypes = { children: PropTypes.func };
@@ -91,6 +129,11 @@ export default class ChessSwap extends Component<IChessSwapProps, IChessSwapStat
     };
 
     onDrop = (info: IOnDrop ) => {
+        // Test that it is the players turn
+        if (!this.state.currentlyMyTurn){
+            return;
+        }
+
         let sourceSquare = info.sourceSquare;
         let targetSquare = info.targetSquare;
         // see if the move is legal
@@ -102,14 +145,19 @@ export default class ChessSwap extends Component<IChessSwapProps, IChessSwapStat
 
         // illegal move
         if (move === null) return;
+
         this.setState(({ history, pieceSquare }) => ({
             fen: this.game.fen(),
             history: this.game.history({ verbose: true }),
             squareStyles: squareStyling({ pieceSquare, history })
         }));
 
-        this.setState({turnsToNextSwap: this.state.turnsToNextSwap - 1})
+        this.props.ws.send(chessCommands.newMove + chessCommands.seperator + info.sourceSquare + chessCommands.seperator + info.targetSquare)
+        this.setState({
+            turnsToNextSwap: this.state.turnsToNextSwap - 1,
+            currentlyMyTurn: false})
         this.props.updateTurnsToSwapOnGui(this.state.turnsToNextSwap)
+
     };
 
     onMouseOverSquare = (square: string) => {
