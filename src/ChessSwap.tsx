@@ -186,7 +186,7 @@ export default class ChessSwap extends Component<IChessSwapProps, IChessSwapStat
                 turnsToNextSwap: this.props.turnsToSwap,
                 currentPlayerColor: newColor,
                 currentOrientation: newColor,
-                currentlyMyTurn: newColor === Color.black
+                currentlyMyTurn: newColor !== Color.black
             })
         }
     }
